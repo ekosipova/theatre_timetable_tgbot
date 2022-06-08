@@ -17,15 +17,15 @@ class Perfomanses:
         self.descr = descr
 
     def __str__(self):
-        return (f'{self.name}${self.time}${self.stage}${self.descr}').split('$')
+        return f'Представление: {self.name}\nВремя начала: {self.time}\nСцена: {self.stage}\nДополнительная информация: {self.descr}'
 
 
 def get_content(html):
     soup = BeautifulSoup(html,'html.parser')
     items = soup.find_all('div',class_='DATE timetable_content') #Separate of datas
-    collection_by_data = []
+    collection_by_datas = []
     for item in items:
-        data = item['id']
+        data = '.'.join(((item['id']).split('.'))[:2])
         info_of_data = item.find_all('div',class_='HALL')
         timetable = []
         for one_spect in info_of_data:
@@ -38,19 +38,25 @@ def get_content(html):
             time = place[-1]
             descrip = " ".join((description.text).split())
             actual_perf = Perfomanses(perfomance.text,time,stage,descrip)
-            timetable.append(actual_perf.__str__())
-        collection_by_data.append({data:timetable})
-    return collection_by_data
+            timetable.append(actual_perf)
+        collection_by_datas.append({data:timetable})
+    return collection_by_datas
 
-def parse():
+def parse(date):
     html = get_html(URL)
     perfomances = []
+    items_to_user = []
     if html.status_code == 200:
         perfomances.extend(get_content(html.text))
-        return perfomances
+        for element in perfomances:
+            if date in element:
+                items_to_user = element[date]
+        return items_to_user
     else:
         print('Error')
 
-parse()
-timetable = parse()
-print(timetable)
+
+
+
+
+
